@@ -5006,13 +5006,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 938328337}
-  m_LocalRotation: {x: -0.00000018696177, y: 0.000007985524, z: -0.00025141105, w: 1}
-  m_LocalPosition: {x: 0.00018310547, y: 1.2917752, z: 0.55454826}
+  m_LocalRotation: {x: 0.000000067055204, y: 0.000000060535946, z: -0.00000006405595, w: 1}
+  m_LocalPosition: {x: 0, y: 0.29200026, z: 0.5500008}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 543450652184789041}
-  m_Father: {fileID: 9129889023932439704}
-  m_RootOrder: 10
+  m_Father: {fileID: 6061851385421761080}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1818360608 &938328339
 PositionConstraint:
@@ -5023,8 +5023,8 @@ PositionConstraint:
   m_GameObject: {fileID: 938328337}
   m_Enabled: 1
   m_Weight: 1
-  m_TranslationAtRest: {x: 0.00018310547, y: 1.2917752, z: 0.55454826}
-  m_TranslationOffset: {x: -0.0667038, y: -0.17516613, z: 0.60591316}
+  m_TranslationAtRest: {x: 0, y: 0.29200026, z: 0.5500008}
+  m_TranslationOffset: {x: -0.06662624, y: -0.17519987, z: 0.605912}
   m_AffectTranslationX: 1
   m_AffectTranslationY: 1
   m_AffectTranslationZ: 1
@@ -5042,8 +5042,8 @@ AimConstraint:
   m_GameObject: {fileID: 938328337}
   m_Enabled: 1
   m_Weight: 1
-  m_RotationAtRest: {x: -0.00002119417, y: 0.0009150784, z: -0.028809572}
-  m_RotationOffset: {x: 9.9055805, y: 2.3754168, z: 0.38004926}
+  m_RotationAtRest: {x: 0.000007683957, y: 0.0000069369034, z: -0.0000073402666}
+  m_RotationOffset: {x: 9.905587, y: 2.3754182, z: 0.38004938}
   m_AimVector: {x: 0, y: 0, z: 1}
   m_UpVector: {x: 0, y: 1, z: 0}
   m_WorldUpVector: {x: 0, y: 1, z: 0}
@@ -5066,8 +5066,8 @@ ParentConstraint:
   m_GameObject: {fileID: 938328337}
   m_Enabled: 1
   m_Weight: 1
-  m_TranslationAtRest: {x: 0.00018310547, y: 1.2917752, z: 0.55454826}
-  m_RotationAtRest: {x: 0, y: 0.0009150784, z: -0.028809572}
+  m_TranslationAtRest: {x: 0, y: 0.29200026, z: 0.5500008}
+  m_RotationAtRest: {x: 0, y: 0, z: 0}
   m_TranslationOffsets:
   - {x: -0.579237, y: -0.025268555, z: 0.25711346}
   m_RotationOffsets:
@@ -8970,6 +8970,63 @@ MonoBehaviour:
     _timeToState: 1
     _coliiderCenter: {x: 0, y: -0.35, z: 0}
   _smoothSpeed: 15
+  _curveBobController:
+    _curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.5
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1.5
+        value: -1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 2
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    _horizontalMultiplier: 0.015
+    _verticalMultiplier: 0.015
+    _horiVertSpeedRatio: 0.015
+    _baseInterval: 0.5
+  _cameraRoot: {fileID: 374610193}
 --- !u!114 &1544606067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14725,8 +14782,9 @@ Transform:
   - {fileID: 1274838299315032108}
   - {fileID: 427500089534493294}
   - {fileID: 5288154976169362772}
+  - {fileID: 938328338}
   m_Father: {fileID: 9129889023932439704}
-  m_RootOrder: 11
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6083826749246156486
 GameObject:
@@ -16010,7 +16068,6 @@ Transform:
   - {fileID: 1783279639886537516}
   - {fileID: 4628296983332624289}
   - {fileID: 1962285132}
-  - {fileID: 938328338}
   - {fileID: 6061851385421761080}
   m_Father: {fileID: 1544606065}
   m_RootOrder: 0

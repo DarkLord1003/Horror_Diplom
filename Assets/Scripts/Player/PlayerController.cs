@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -16,9 +17,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _yClampMax;
     [SerializeField] private bool _inverseX;
     [SerializeField] private bool _inverseY;
-
-    private Vector3 _targetPositionLookAtObject;
-    private Vector3 _targetPositionlookAtObjectVelocity;
 
     [Header("Move Parameters")]
     [SerializeField] private float _walkSpeed;
@@ -45,6 +43,10 @@ public class PlayerController : MonoBehaviour
     [Header("Smoothing Parameters")]
     [SerializeField] private float _smoothSpeed;
 
+    [Header("Curve Bob Controller")]
+    [SerializeField] private CurveControllerBob _curveBobController;
+    [SerializeField] private Transform _cameraRoot;
+
   
 
     private PlayerStateController _stateController;
@@ -59,6 +61,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 _inputVector;
     private Vector3 _cameraRotation;
     private Vector3 _targetCameraRotation;
+    private Vector3 _localSpacePositionCamera;
     private Vector3 _targetCameraRotationVelocity;
     private Vector3 _playerRotation;
     private Vector3 _targetPlayerRotation;
@@ -85,7 +88,6 @@ public class PlayerController : MonoBehaviour
         _anim = GetComponentInChildren<Animator>();
         _camera = Camera.main;
         _stateController = new PlayerStateController();
-
         _stateController.InitStates(_stateMachine, this);
     }
 
@@ -94,7 +96,10 @@ public class PlayerController : MonoBehaviour
         _currentStamina = _maxStamina;
         _currentStaminaRestoreTime = _staminaRestoreTime;
         _currentBodyState = _stand;
+        _localSpacePositionCamera = _cameraRoot.transform.localPosition;
 
+        _curveBobController.Initialize();
+        _curveBobController.RegisterEvent(1f, PlayFootStepsSound, CurveBobCallbackType.Vectical);
     }
 
     private void Update()
@@ -176,6 +181,17 @@ public class PlayerController : MonoBehaviour
         }
 
         _characterController.Move(_moveDirection * Time.deltaTime);
+
+        if(_characterController.velocity.magnitude > 0.05f)
+        {
+            _cameraRoot.transform.localPosition = _localSpacePositionCamera +
+                                                  _curveBobController.GetVectorOffset
+                                                  (_characterController.velocity.magnitude);
+        }
+        else
+        {
+            _cameraRoot.transform.localPosition = _localSpacePositionCamera;
+        }
     }
 
     private void CalculatePlayerStatus()
@@ -293,6 +309,11 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    private void PlayFootStepsSound()
+    {
+
+    }
+
     private void OnEnable()
     {
         _input.Crouch = CrouchingStanding;
@@ -343,5 +364,133 @@ public class PlayerBodyState
         set => _coliiderCenter = value;
     }
 
-
 }
+
+[System.Serializable]
+public class CurveControllerBob
+{
+    [SerializeField]
+    private AnimationCurve _curve = new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(0.5f, 1f),
+                                                       new Keyframe(1f, 0f), new Keyframe(1.5f, -1f),
+                                                       new Keyframe(2f, 0f));
+
+    [SerializeField] private float _horizontalMultiplier;
+    [SerializeField] private float _verticalMultiplier;
+    [SerializeField] private float _horiVertSpeedRatio;
+    [SerializeField] private float _baseInterval;
+
+    private float _xPlayHead;
+    private float _yPlayHead;
+    private float _prevXPlayHead;
+    private float _prevYPlayHead;
+    private float _curveEndTime;
+
+    private List<CurveBobEvent> _events;
+
+    public void Initialize()
+    {
+        _curveEndTime = _curve[_curve.length - 1].time;
+        _xPlayHead = 0f;
+        _yPlayHead = 0f;
+        _prevXPlayHead = 0f;
+        _prevYPlayHead = 0f;
+
+        _events = new List<CurveBobEvent>();
+    }
+
+    public void RegisterEvent(float time, CurveBobCallback function, CurveBobCallbackType type)
+    {
+        CurveBobEvent curveBobEvent = new CurveBobEvent();
+        curveBobEvent.Time = time;
+        curveBobEvent.Function = function;
+        curveBobEvent.Type = type;
+
+        _events.Add(curveBobEvent);
+        _events.Sort((CurveBobEvent t1, CurveBobEvent t2) =>
+        {
+            return (t1.Time.CompareTo(t2.Time));
+        });
+    }
+
+
+    public Vector3 GetVectorOffset(float speed)
+    {
+        _xPlayHead += (speed * Time.deltaTime) / _baseInterval;
+        _yPlayHead += ((speed * Time.deltaTime) / _baseInterval) * _horiVertSpeedRatio;
+
+        if (_xPlayHead > _curveEndTime)
+            _xPlayHead -= _curveEndTime;
+
+        if (_yPlayHead > _curveEndTime)
+            _yPlayHead -= _curveEndTime;
+
+        for (int i = 0; i < _events.Count; i++)
+        {
+            CurveBobEvent ev = _events[i];
+
+            if (ev != null)
+            {
+                if (ev.Type == CurveBobCallbackType.Vectical)
+                {
+                    if ((_prevYPlayHead < ev.Time && _yPlayHead >= ev.Time ||
+                        (_prevYPlayHead > _yPlayHead && (ev.Time > _prevYPlayHead || ev.Time <= _yPlayHead))))
+                    {
+                        ev.Function();
+                    }
+                }
+                else
+                {
+                    if ((_prevXPlayHead < ev.Time && _xPlayHead >= ev.Time ||
+                       (_prevXPlayHead > _xPlayHead && (ev.Time > _prevXPlayHead || ev.Time <= _xPlayHead))))
+                    {
+                        ev.Function();
+                    }
+                }
+
+            }
+        }
+
+
+        float xPos = _curve.Evaluate(_xPlayHead) * _horizontalMultiplier;
+        float yPos = _curve.Evaluate(_yPlayHead) * _verticalMultiplier;
+
+        _prevXPlayHead = _xPlayHead;
+        _prevYPlayHead = _yPlayHead;
+
+        return new Vector3(xPos, yPos, 0f);
+
+    }
+}
+
+public class CurveBobEvent
+{
+    [SerializeField] private float _time;
+    [SerializeField] private CurveBobCallback _function;
+    [SerializeField] private CurveBobCallbackType _type;
+
+    public float Time
+    {
+        get => _time;
+        set => _time = value;
+    }
+
+    public CurveBobCallback Function
+    {
+        get => _function;
+        set => _function = value;
+    }
+
+    public CurveBobCallbackType Type
+    {
+        get => _type;
+        set => _type = value;
+    }
+}
+
+public enum CurveBobCallbackType
+{
+    Vectical,
+    Horizontal
+}
+
+public delegate void CurveBobCallback();

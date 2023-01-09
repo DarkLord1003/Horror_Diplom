@@ -22,8 +22,9 @@ public class IKController : MonoBehaviour
 
     private void OnAnimatorIK(int layerIndex)
     {
+        _IKHand.UpdateIKHand(_animator);
         _ikLookAt.LookAt(_animator);
         _IKFootPlacement.UpdateFoot();
-        _IKHand.UpdateIKHand(_animator);
+
     }
 }
